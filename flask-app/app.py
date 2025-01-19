@@ -15,35 +15,6 @@ api = Api(app)
 
 OPENWEATHERMAP_API_KEY = os.getenv("OPENWEATHERMAP_API_KEY")
 
-# # Define the resource class
-# class WeatherResource(Resource):
-def get(self):
-    try:
-        # Fetch API key from environment variable
-        api_key = os.getenv("OPENWEATHERMAP_API_KEY")
-        if not api_key:
-            return {"success": False, "error": "API key not found in environment variables"}, 500
-
-        # Get latitude and longitude from query parameters
-        lat = request.args.get('lat')
-        lon = request.args.get('lon')
-
-        if not lat or not lon:
-            return {"success": False, "error": "Missing 'lat' or 'lon' query parameters"}, 400
-
-        # Call OpenWeatherMap API
-        weather_url = "https://api.openweathermap.org/data/2.5/weather"
-        response = requests.get(weather_url, params={"lat": lat, "lon": lon, "appid": api_key})
-
-        if response.status_code == 200:
-            weather_data = response.json()
-            return {"success": True, "data": weather_data}, 200
-        else:
-            return {"success": False, "error": response.json().get("message", "Failed to fetch weather data")}, response.status_code
-
-    except Exception as e:
-        return {"success": False, "error": str(e)}, 500
-
 # Helper function to parse standard latitude and longitude format
 def parse_lat_lon(user_input):
     try:
@@ -68,19 +39,14 @@ def parse_lat_lon(user_input):
 
 @app.route('/webhook', methods=['POST'])
 def webhook():
+    if OPENWEATHERMAP_API_KEY is None:
+        return "OPENWEATHERMAP_API_KEY is required!"
+
     req = request.get_json()
 
     # Extract user input
     intent = req['queryResult']['intent']['displayName']
-
-    # Handle Greeting Intent
-    if intent == "Greeting":
-        greeting_response = (
-            "Hi! I am a weather bot. What location would you like to know the current weather for? "
-            "Use the standard latitude and longitude format, which for New York City, for example, would be: 40°42′46″N 74°0′22″W."
-        )
-        return jsonify({"fulfillmentText": greeting_response})
-            
+           
     if intent == "GetWeather":
         user_input = req['queryResult']['queryText']
         lat, lon = parse_lat_lon(user_input)
