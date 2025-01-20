@@ -3,6 +3,7 @@ import logging
 import os
 import re
 import requests
+import json
 from dotenv import load_dotenv
 
 # Load environment variables
@@ -45,8 +46,12 @@ def webhook(req: func.HttpRequest) -> func.HttpResponse:
     try:
         # Parse the incoming request JSON
         req_body = req.get_json()
-        intent = req_body.get('queryResult', {}).get('intent', {}).get('displayName')
-        query_text = req_body.get('queryResult', {}).get('queryText')
+        
+        intent = req_body['queryResult']['intent']['displayName']
+        query_text = req_body['queryResult']['queryText']
+
+        print(f"intent: {intent}")
+        print(f"query_text: {json.dumps(req_body['queryResult'])}")
 
         # Handle "Greeting" intent
         if intent == "Greeting":
@@ -74,7 +79,12 @@ def webhook(req: func.HttpRequest) -> func.HttpResponse:
                 weather_main = weather_data["weather"][0]["description"]
                 temperature = weather_data["main"]["temp"]
                 weather_message = f"The weather for the given location is {weather_main} with a temperature of {temperature}ºC."
-                return func.HttpResponse(weather_message, status_code=200)
+                return func.HttpResponse(
+                    json.dumps({
+                        "fulfillmentText": weather_message
+                    }),
+                    status_code=200
+                )                
             else:
                 return func.HttpResponse(
                     "Failed to fetch weather data. Please try again later.",
