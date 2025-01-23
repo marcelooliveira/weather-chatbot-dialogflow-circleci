@@ -57,7 +57,7 @@ def webhook(req: func.HttpRequest) -> func.HttpResponse:
         if intent == "Greeting":
             return func.HttpResponse(
                 "Hi! I am a weather bot. What location would you like to know the current weather for? "
-                "Use the standard latitude and longitude format, which for Paris, for example, would be: 48°51′24″N 2°21′8″E.",
+                "Use the standard latitude and longitude format, which for Madrid, for example, would be: 40°25′01″N 03°42′12″W.",
                 status_code=200
             )
 
