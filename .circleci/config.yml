@@ -7,15 +7,15 @@ jobs:
       - azure-cli/install
       - azure-cli/login-with-service-principal
       - run:
-          name: Install Azure functions tools
-          command: sudo npm i -g azure-functions-core-tools@3 --unsafe-perm true
+          name: Install Azure Functions Core Tools
+          command: sudo apt-get update && sudo apt-get install -y azure-functions-core-tools-4
       - run:
-          name: Deploy to Azure function App
+          name: Deploy to Azure Function App
           command: func azure functionapp publish $FUNCTION_APP_NAME --python
 
 orbs:
   azure-cli: circleci/azure-cli@1.0.0
-  python: circleci/python@3.0.0
+  python: circleci/python@1.3.0
 version: 2.1
 workflows:
   login-workflow:
