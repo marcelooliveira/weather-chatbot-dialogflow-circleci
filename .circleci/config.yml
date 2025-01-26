@@ -17,7 +17,9 @@ jobs:
             sudo apt-get install azure-functions-core-tools-4
       - run:
           name: Deploy to Azure Function App
-          command: CLI_DEBUG=1 func azure functionapp publish $FUNCTION_APP_NAME --python
+          command: |
+            export OPENWEATHERMAP_API_KEY=$OPENWEATHERMAP_API_KEY
+            CLI_DEBUG=1 func azure functionapp publish $FUNCTION_APP_NAME --python
 
 orbs:
   azure-cli: circleci/azure-cli@1.0.0
