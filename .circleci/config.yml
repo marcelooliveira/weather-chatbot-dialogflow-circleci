@@ -1,21 +1,31 @@
 jobs:
   deploy:
     working_directory: ~/repo/azure-function-app/
-    executor: python/default
+    docker:
+      - image: cimg/python:3.9
     steps:
       - checkout
       - azure-cli/install
       - azure-cli/login-with-service-principal
+      - python/install-packages:
+          pkg-manager: pip
+          # Assuming your requirements are in a requirements.txt file
+          requirements: requirements.txt
       - run:
           name: Install Azure Functions Core Tools
-          command: sudo apt-get update && sudo apt-get install azure-functions-core-tools-4
+          command: |
+            curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > microsoft.gpg
+            sudo mv microsoft.gpg /etc/apt/trusted.gpg.d/
+            sudo sh -c 'echo "deb [arch=amd64] https://packages.microsoft.com/repos/microsoft-ubuntu-$(lsb_release -cs)-prod $(lsb_release -cs) main" > /etc/apt/sources.list.d/dotnetdev.list'
+            sudo apt-get update
+            sudo apt-get install azure-functions-core-tools-3
       - run:
           name: Deploy to Azure Function App
           command: func azure functionapp publish $FUNCTION_APP_NAME --python
 
 orbs:
   azure-cli: circleci/azure-cli@1.0.0
-  python: circleci/python@1.3.0
+  python: circleci/python@1.2.0
 version: 2.1
 workflows:
   login-workflow:
