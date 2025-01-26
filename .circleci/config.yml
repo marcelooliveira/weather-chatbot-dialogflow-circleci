@@ -1,6 +1,6 @@
 jobs:
   deploy:
-    working_directory: ~/repo/azure-function-app/
+    working_directory: ~/repo
     docker:
       - image: cimg/python:3.9
     steps:
