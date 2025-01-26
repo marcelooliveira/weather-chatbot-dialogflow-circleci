@@ -7,10 +7,6 @@ jobs:
       - checkout
       - azure-cli/install
       - azure-cli/login-with-service-principal
-      - python/install-packages:
-          pkg-manager: pip
-          # Assuming your requirements are in a requirements.txt file
-          requirements: requirements.txt
       - run:
           name: Install Azure Functions Core Tools
           command: |
