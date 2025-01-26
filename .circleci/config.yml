@@ -1,7 +1,7 @@
 jobs:
   deploy:
     working_directory: ~/repo/azure-function-app/
-    executor: node/default
+    executor: python/default
     steps:
       - checkout
       - azure-cli/install
@@ -15,7 +15,7 @@ jobs:
 
 orbs:
   azure-cli: circleci/azure-cli@1.0.0
-  python: circleci/python@1.3.0
+  python: circleci/python@3.0.0
 version: 2.1
 workflows:
   login-workflow:
