@@ -18,8 +18,8 @@ jobs:
       - run:
           name: Deploy to Azure Function App
           command: |
-            export OPENWEATHERMAP_API_KEY=$OPENWEATHERMAP_API_KEY
             CLI_DEBUG=1 func azure functionapp publish $FUNCTION_APP_NAME --python
+            az functionapp config appsettings set --name $FUNCTION_APP_NAME --resource-group $FUNCTION_APP_NAME_RESOURCE_GROUP --settings OPENWEATHERMAP_API_KEY=$OPENWEATHERMAP_API_KEY
 
 orbs:
   azure-cli: circleci/azure-cli@1.0.0
