@@ -53,16 +53,8 @@ def webhook(req: func.HttpRequest) -> func.HttpResponse:
         print(f"intent: {intent}")
         print(f"query_text: {json.dumps(req_body['queryResult'])}")
 
-        # Handle "Greeting" intent
-        if intent == "Greeting":
-            return func.HttpResponse(
-                "Hi! I am a weather bot. What location would you like to know the current weather for? "
-                "Use the standard latitude and longitude format, which for Lisbon, for example, would be: 38°43′31″N 09°09′00″W.",
-                status_code=200
-            )
-
-        # Handle "GetWeather" intent
-        if intent == "GetWeather":
+        # Handle "GetWeatherByCoordinates" intent
+        if intent == "GetWeatherByCoordinates":
             lat, lon = parse_lat_lon(query_text)
             if lat is None or lon is None:
                 return func.HttpResponse(
