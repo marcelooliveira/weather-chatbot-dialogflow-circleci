@@ -8,7 +8,7 @@ jobs:
       - azure-cli/login-with-service-principal
       - run:
           name: Install Azure Functions Core Tools
-          command: sudo apt-get update && sudo apt-get install -y azure-functions-core-tools-4
+          command: sudo apt-get update && sudo apt-get install -y azure-functions-core-tools-3
       - run:
           name: Deploy to Azure Function App
           command: func azure functionapp publish $FUNCTION_APP_NAME --python
