@@ -255,7 +255,7 @@ In this step, we will automate the deployment process. Begin by [pushing the pro
 
 Next, visit the Projects page on the [CircleCI dashboard](https://app.circleci.com/projects). Select the appropriate GitHub account to link the project.
 
-![circle ci dashboard](2025-09-01-moliveira-circle-ci-dashboard.png)
+![circle ci dashboard](../src/blog/media/2025-09-01-moliveira-circle-ci-dashboard.png)
 
 ### Add Project to CircleCI
 
@@ -265,7 +265,7 @@ Click on the **Set Up Project** button to initiate the project setup.
 
 On the setup page, select **Use Existing Config** to indicate that you're adding a configuration file manually, instead of using the sample provided. You'll then be prompted to either download the configuration file for the pipeline or start the build.
 
-![Have you added a config.yml file?](2025-09-01-moliveira-have-you-added-config.png)
+![Have you added a config.yml file?](../src/blog/media/2025-09-01-moliveira-have-you-added-config.png)
 
 ### Start the Build
 
@@ -284,11 +284,11 @@ The required environment variables are:
 
 Go to **Project Settings** and then **Environment Variables** on your CircleCI project, and click **Add Environment Variable**.
 
-![Add Environment Variable](2025-09-01-moliveira-add-environment-variable.png)
+![Add Environment Variable](../src/blog/media/2025-09-01-moliveira-add-environment-variable.png)
 
 Using the dialog, add the environment variables listed above.
 
-![Environment Variables](2025-09-01-moliveira-environment-variables.png)
+![Environment Variables](../src/blog/media/2025-09-01-moliveira-environment-variables.png)
 
 ### **3. Configuring CircleCI Integration**  
 
@@ -386,7 +386,7 @@ This CircleCI configuration automates the process of deploying a Python app to A
 
 You'll end up with two flows that can respond to user questions about the current weather either using latitude and longitude or the city, state, and country names:
 
-![DialogFlow's coordinates and city flows](2025-09-01-moliveira-two-flows.png)
+![DialogFlow's coordinates and city flows](../src/blog/media/2025-09-01-moliveira-two-flows.png)
 
 ---
 
