@@ -1,153 +1,6 @@
----
-layout: post
-featured: false
-popular: false
-date: '2020-04-02 9:00'
-published: true
-title: Test title
-author: ron-powell
-image: /blog/media/Tutorial-Intermediate.jpg
-html_title: >-
-  Test title | CircleCI
-description: >-
-  Test description
-summary: >-
-  Same as test description
-tags:
-  - tutorials
-  - engineering
-pinned: false
----
-
-This test post also serves as a guide for the writing in markdown and some conventions we use.
-
-## Titles
-
-## Use this for section titles
-
-_In Markdown_:
-
-```markdown
-## Use this for section titles
-```
-
-Use `sentence-case` for titles and headers.
-
-## Terminal commands
-
-```bash
-npm init -y
-```
-
-_In Markdown_:
-
-  ```markdown
-    ```bash
-    npm init -y
-    ```
-  ```
-
-## Code snippets
-
-If the text preceding a code snippet suggests that you copy the code, use a `colon` signifying this. Use a period if you are just describing the code.
-
-### Example
-
-> The following is an excerpt from a blog post. Note the use of a full stop instead of a colon.
-
-You can specify the name, theme and background colors in the manifest file for your app. Below is a snippet of my `manifest.json`.
-
-```json
-{
-  "name": "my-awesome-app",
-  "theme_color": "#000000",
-  "background_color": "#ffffff",
-}
-```
-
-## Included image
-
-> Using markdown
-
-![alt text for image2](../src/blog/media/2020-04-15-image2.jpg)
-
-_In Markdown_:
-
-```markdown
-![alt text for image2](../src/blog/media/2020-04-15-image2.jpg)
-```
-
-> Using HTML
-
-<div style="text-align:center"><img alt="alt text for image" src="../src/blog/media/2020-04-15-image2.jpg"/></div>
-
-_In Markdown_:
-
-```markdown
-<div style="text-align:center"><img alt="alt text for image" src="../src/blog/media/2020-04-15-image2.jpg"/></div>
-```
-
-Do not use a colon leading up to an image.
-
-## Other texts
-
-## Links
-
-Linked text example: [CircleCI blog][1]
-
-_In Markdown_:
-
-```markdown
-Linked text example: [CircleCI blog][1]
-...
-
-// at the end of the file
-[1]: https://circleci.com/blog/
-```
-
-_OR_:
-
-```markdown
-Linked text example: [CircleCI blog](https://circleci.com/blog/)
-```
-
-## Important to note
-
-**Note**: <i>Some important information</i>
-
-_In Markdown_:
-
-```markdown
-**Note**: <i>Some important information</i>
-```
-
-## Listing items
-
-Use the Oxford comma.
-
-```txt
-You will need a pencil, paper, and ruler.
-```
-
-The Oxford comma is the one that comes after "paper". The Oxford comma is also called the serial comma.
-
-Refer to this [Markdown guide][guide] for more on the Markdown syntax.
-
-[1]: https://circleci.com/blog/
-[guide]: https://www.markdownguide.org/
-
-
-
-
-
-
-
-
-
-
 # Title: Building a Chatbot with Dialogflow And CircleCI
 
-Here we'll guide users on building a conversational chatbot app and deploying it to Azure Function app written in Python. The chatbot app will interact with using Google Dialogflow and https://openweathermap.org to answer user questions related to current weather data in specific world location. Topics to be covered: designing conversation flows, integrating with external APIs, and use CircleCI to set up a CI/CD pipeline for continuous integration and deployment of chatbot updates. We'll use CircleCI to deploy our code to Azure Function app every time our GitHub repo is updated. In the end, users will be able to pass questions to Azure Function app and receive weather prediction answers produced by the chatbot.
+Here we'll guide users on building a conversational chatbot app and deploying it to Azure Function app written in Python. The chatbot app will interact with using Google Dialogflow and [OpenWeather API](https://openweathermap.org) to answer user questions related to current weather data in specific world location. Topics to be covered: designing conversation flows, integrating with external APIs, and use CircleCI to set up a CI/CD pipeline for continuous integration and deployment of chatbot updates. We'll use CircleCI to deploy our code to Azure Function app every time our GitHub repo is updated. In the end, users will be able to pass questions to Azure Function app and receive weather prediction answers produced by the chatbot.
 
 ### **Outline for the Tutorial: Building a Chatbot with Dialogflow and CircleCI**
 
@@ -301,6 +154,183 @@ This step-by-step guide ensures the flow aligns with the sequence provided.
   - Fetching current weather data for user-specified locations.  
   - Formatting and error handling for API responses.  
 
+### Configuring an Azure Function App: Step-by-Step
+
+Setting up an Azure Function App involves several key steps to prepare the environment, authenticate with Azure, and deploy the necessary resources. The following commands use the Azure Command-Line Interface (CLI).
+
+The first step in any Azure operation is to authenticate with your Azure account:
+
+```bash
+az login --tenant [YOUR-AZURE-TENANT]
+```
+
+Next, you need to create a resource group to hold the Azure resources related to our project.
+
+```bash
+az group create --name [YOUR-AZURE-RESOURCE-GROUP] --location [YOUR-AZURE-REGION]
+```
+
+Then we create a Service Principal (SP) to allow our CircleCI project to authenticate with Azure and perform operations:
+
+```bash
+az ad sp create-for-rbac --name circleci-weather-sp --role Contributor --scopes /subscriptions/[YOUR-AZURE-SUBSCRIPTION]/resourceGroups/[YOUR-AZURE-RESOURCE-GROUP]
+```
+
+Next, create a new Azure Storage account to manage logs, queues, and other function-related data:
+
+```bash
+az storage account create --name circleciweatherstorage --location [YOUR-AZURE-REGION] --resource-group [YOUR-AZURE-RESOURCE-GROUP] --sku Standard_LRS
+```
+
+Finally, create the Azure Function App itself, which will host the Python-based function that you want to deploy:
+
+```bash
+az functionapp create --resource-group [YOUR-AZURE-RESOURCE-GROUP] --consumption-plan-location [YOUR-AZURE-REGION] --runtime python --runtime-version "3.11" --functions-version 4 --name circleci-weather-functionapp --os-type linux --storage-account circleciweatherstorage
+```
+
+
+
+### **3. Setting up the Azure Function App**  
+
+The provided Python code implements an Azure Function webhook that communicates with Dialogflow intents to provide weather information using the OpenWeatherMap API. Below are the key highlights and how the code communicates with Dialogflow intents:
+
+1. **Environment Variables**:
+   - The `OPENWEATHERMAP_API_KEY` is loaded from an `.env` file using the `dotenv` package. This key is used for making API requests to OpenWeatherMap. If you want to run this Azure Function App locally, create a `local.settings.json` file with this content:
+
+```json
+   {
+    "IsEncrypted": false,
+        "Values": {
+            "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+            "FUNCTIONS_WORKER_RUNTIME": "python",
+            "AzureWebJobsFeatureFlags": "EnableWorkerIndexing",
+            "OPENWEATHERMAP_API_KEY": "[YOUR-OPENWEATHERMAP-API-KEY]"
+        }
+    }
+
+```
+3. **Azure Function Webhook**:
+   - The Azure Function is defined with an HTTP route (`/webhook`) that listens for incoming HTTP requests.
+   - **Intent Handling**: The code processes incoming requests from Dialogflow based on the detected intent:
+     - **"GetWeatherByCoordinates"**: The function extracts latitude and longitude from the `queryText`, parses it using the `parse_lat_lon()` helper, and fetches the weather data using those coordinates.
+     - **"GetCountryName"**: The function extracts `geo-city`, `geo-state`, and `geo-country` from the `outputContexts` in the Dialogflow request, uses the `get_coords()` function to fetch latitude and longitude, and then retrieves weather data for that location.
+     - If the intent is not recognized or is unhandled, the function returns a default message.
+   
+4. **Error Handling**:
+   - If the latitude and longitude cannot be parsed, or if there is an error in fetching the weather data, appropriate responses are returned (e.g., "Invalid latitude and longitude format" or "Failed to fetch weather data").
+   - General errors are caught and logged, returning a generic error message in case of unexpected issues.
+
+### **Communication with DialogFlow Intents**:
+
+The Azure Function webhook interacts with Dialogflow intents in the following ways:
+
+1. **Incoming Request Structure**:
+   - The webhook expects incoming HTTP requests to contain a JSON payload with `queryResult`, which contains the `intent` name and relevant parameters.
+   - The relevant parameters, like `geo-city`, `geo-state`, and `geo-country`, are extracted from the `outputContexts` (for intents like `GetCountryName`).
+   
+2. **Handling the `GetWeatherByCoordinates` Intent**:
+   - The webhook listens for the `GetWeatherByCoordinates` intent.
+   - It extracts the `queryText` from the incoming request and attempts to parse latitude and longitude from it using the `parse_lat_lon()` function.
+   - If the coordinates are valid, it makes a request to OpenWeatherMap's weather API using the parsed coordinates and returns the weather details to the user in the response.
+
+3. **Handling the `GetCountryName` Intent**:
+   - The webhook listens for the `GetCountryName` intent.
+   - It extracts the city, state, and country from the `outputContexts` of the incoming request.
+   - The webhook then makes a request to OpenWeatherMap's geo API to retrieve the latitude and longitude of the location based on the extracted city, state, and country.
+   - The coordinates are used to call the weather API and return the weather data to the user.
+
+4. **Response Format**:
+   - For both intents, the webhook returns a JSON response with the `fulfillmentText` field, which contains the weather details (e.g., weather description and temperature).
+   - If there are errors (e.g., invalid input or failed API request), the function responds with appropriate error messages.
+
+### **How It Communicates with DialogFlow Intents**:
+
+1. **Dialogflow** sends a JSON payload to the Azure Function webhook, which contains the `intent` and extracted parameters (`geo-city`, `geo-state`, `geo-country`, `queryText`).
+2. The Azure Function processes this information, calling the appropriate weather APIs and formatting the response.
+3. The Azure Function returns the weather information in the `fulfillmentText` field of the JSON response, which Dialogflow uses to respond to the user.
+
+## Configuring the Project on CircleCI
+
+In this step, we will automate the deployment process. Begin by [pushing the project to GitHub](https://circleci.com/blog/pushing-a-project-to-github/) from the root of your project folder.
+
+Next, visit the Projects page on the [CircleCI dashboard](https://app.circleci.com/projects). Select the appropriate GitHub account to link the project.
+
+![circle ci dashboard](2025-09-01-moliveira-circle-ci-dashboard.png)
+
+### Add Project to CircleCI
+
+Click on the **Set Up Project** button to initiate the project setup.
+
+### Configure CircleCI
+
+On the setup page, select **Use Existing Config** to indicate that you're adding a configuration file manually, instead of using the sample provided. You'll then be prompted to either download the configuration file for the pipeline or start the build.
+
+![Have you added a config.yml file?](2025-09-01-moliveira-have-you-added-config.png)
+
+### Start the Build
+
+Click **Start Building**. The initial build will fail because the configuration file hasn't been set up yet, but we will complete this step later in the tutorial.
+
+At this point, you'll need access to your Azure account in the deployment script. This is why we created the Azure Service Principal account earlier in the tutorial. We will use the [azure-cli](https://circleci.com/developer/orbs/orb/circleci/azure-cli) orb to log in and use Azure CLI in the deployment script. This orb requires the setup of several environment variables for the project.
+
+The required environment variables are:
+
+- **AZURE_SP**: The appId of your Service Principal
+- **AZURE_SP_PASSWORD**: The password key from your service principal account creation response
+- **AZURE_SP_TENANT**: The tenant key from your service principal account creation response
+- **FUNCTION_APP_NAME**: The name of your Azure Function App created with the Azure CLI
+- **FUNCTION_APP_NAME_RESOURCE_GROUP**: The name of the Azure resource group where the function app was created
+- **OPENWEATHERMAP_API_KEY**: The API key obtained when you registered with OpenWeather
+
+Go to **Project Settings** and then **Environment Variables** on your CircleCI project, and click **Add Environment Variable**.
+
+![Add Environment Variable](2025-09-01-moliveira-add-environment-variable.png)
+
+Using the dialog, add the environment variables listed above.
+
+![Environment Variables](2025-09-01-moliveira-environment-variables.png)
+
+### **3. Configuring CircleCI Integration**  
+
+Let's discuss the following config.yml file contained in the /.circleci folder of our Azure Function App project.
+
+```yaml
+jobs:
+  deploy:
+    working_directory: ~/repo
+    docker:
+      - image: cimg/python:3.9
+    steps:
+      - checkout
+      - azure-cli/install
+      - azure-cli/login-with-service-principal
+      - run:
+          name: Install Azure Functions Core Tools
+          command: |
+            curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > microsoft.gpg
+            sudo mv microsoft.gpg /etc/apt/trusted.gpg.d/
+            sudo sh -c 'echo "deb [arch=amd64] https://packages.microsoft.com/repos/microsoft-ubuntu-$(lsb_release -cs)-prod $(lsb_release -cs) main" > /etc/apt/sources.list.d/dotnetdev.list'
+            sudo apt-get update
+            sudo apt-get install azure-functions-core-tools-4
+      - run:
+          name: Deploy to Azure Function App
+          command: |
+            CLI_DEBUG=1 func azure functionapp publish $FUNCTION_APP_NAME --python
+            az functionapp config appsettings set --name $FUNCTION_APP_NAME --resource-group $FUNCTION_APP_NAME_RESOURCE_GROUP --settings OPENWEATHERMAP_API_KEY=$OPENWEATHERMAP_API_KEY
+
+orbs:
+  azure-cli: circleci/azure-cli@1.0.0
+  python: circleci/python@1.2.0
+version: 2.1
+workflows:
+  login-workflow:
+    jobs:
+      - deploy
+
+```
+
+This CircleCI configuration automates the process of deploying a Python app to Azure Functions. It installs necessary tools like Azure Functions Core Tools, logs in to Azure, and then deploys the app to an Azure Function App. Additionally, it sets an environment variable (`OPENWEATHERMAP_API_KEY`) needed for the app's functionality. The configuration uses reusable orbs for Azure CLI and Python-related steps, simplifying the deployment process.
+
 ### **3. Deploying the Chatbot to Azure Function App**  
 - **Setting up Azure Function App**:  
   - Configuring a Python Function App.  
@@ -314,13 +344,6 @@ This step-by-step guide ensures the flow aligns with the sequence provided.
 - **Configuring CircleCI for the project**:  
   - Creating the `config.yml` file.  
   - Setting up build, test, and deploy workflows.  
-
-az login --tenant [YOUR-AZURE-TENANT]
-az group create --name [YOUR-AZURE-RESOURCE-GROUP] --location [YOUR-AZURE-REGION]
-az ad sp create-for-rbac --name circleci-weather-sp --role Contributor --scopes /subscriptions/[YOUR-AZURE-SUBSCRIPTION]/resourceGroups/[YOUR-AZURE-RESOURCE-GROUP]
-az storage account create --name circleciweatherstorage --location [YOUR-AZURE-REGION] --resource-group [YOUR-AZURE-RESOURCE-GROUP] --sku Standard_LRS
-az functionapp create --resource-group [YOUR-AZURE-RESOURCE-GROUP] --consumption-plan-location [YOUR-AZURE-REGION] --runtime python --runtime-version "3.11" --functions-version 4 --name circleci-weather-functionapp --os-type linux --storage-account circleciweatherstorage
-
 
 - **Connecting CircleCI to GitHub and Azure**:  
   - Setting up GitHub triggers for CircleCI.  
@@ -360,6 +383,10 @@ az functionapp create --resource-group [YOUR-AZURE-RESOURCE-GROUP] --consumption
 9. DialogFlow will respond with "Enter the country name."
 10. Type in 'Germany' in the **Try it now** field.
 11. DialogFlow will respond with "The weather for Munich / Bavaria / Germany is overcast clouds with a temperature of 1.94ºC."
+
+You'll end up with two flows that can respond to user questions about the current weather either using latitude and longitude or the city, state, and country names:
+
+![DialogFlow's coordinates and city flows](2025-09-01-moliveira-two-flows.png)
 
 ---
 
