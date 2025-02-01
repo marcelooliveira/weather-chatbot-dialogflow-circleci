@@ -107,6 +107,8 @@ def webhook(req: func.HttpRequest) -> func.HttpResponse:
             geo_state = None
             geo_country = None
 
+            print(query_result["outputContexts"])
+
             # Loop through outputContexts to find the context containing all three parameters
             for context in query_result["outputContexts"]:
                 params = context.get("parameters", {})
